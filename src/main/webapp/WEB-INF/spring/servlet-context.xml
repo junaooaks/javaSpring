@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx   http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<!-- Habilita o uso da anotação @Controller -->
+	<annotation-driven />
+	<!-- Definição do pacote base que será escaniado em busca das annotations -->
+	<context:component-scan base-package="br.com.webcom" />
+
+	<!-- Habilita o uso da annotation @Transaction para dizer ao spring quando 
+		ele deve controlar a transação. -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- Define o padrão de URL que será usando na requisição dos resources(js, 
+		css, jpge e etc). Com isso as requisições aos mesmos não seram processadas 
+		pelo Spring. Os arquivos devem ficar em ${webappRoot}/resources directory -->
+	<resources mapping="/resources/**" location="/resources/" />
+
+	<!-- Configure to plugin JSON as request and response in method handler -->
+	<beans:bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+		<beans:property name="messageConverters">
+			<beans:list>
+				<beans:ref bean="jsonMessageConverter" />
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+
+	<!-- Configure bean to convert JSON to POJO and vice versa -->
+	<beans:bean id="jsonMessageConverter"
+		class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+	</beans:bean>
+
+	<!--Define o bean que vai resolver as urls chamadas pelo navegador. O prefix 
+		é a pasta que contem os arquivos jsp. O suffix é a extensão do arquivo. -->
+	<beans:bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+</beans:beans>

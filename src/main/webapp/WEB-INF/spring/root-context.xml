@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop
+                        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd 
+                        http://www.springframework.org/schema/beans 
+                        http://www.springframework.org/schema/beans/spring-beans.xsd 
+                        http://www.springframework.org/schema/context 
+                        http://www.springframework.org/schema/context/spring-context.xsd  
+                        http://www.springframework.org/schema/tx 
+          				http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<!-- Importação do arquivo que possue as configurações do banco de dados -->
+	<context:property-placeholder location="classpath:persistence.properties" />
+	<!-- Importação das configurações de Segurança do Spring Security -->
+	<import resource="spring-security.xml" />
+	<!-- Definição do pacote base que será escaniado em busca das annotations -->
+	<context:component-scan base-package="br.com.webcom"></context:component-scan>
+
+	<!-- Cria o bean dataSource com as configurações de acesso ao banco. -->
+	<bean id="dataSource" class="org.apache.tomcat.dbcp.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.user}" />
+		<property name="password" value="${jdbc.pass}" />
+	</bean>
+
+	<!-- Criao bean da fábrica de conexões do Hibernate -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="packagesToScan" value="br.com.webcom.entity" />
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- Gerenciador de transações do Spring. Essa configuração permite ao Spring abrir e fechar as conexões com o banco de dados -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<!-- Habilita o uso da annotation @Transaction para dizer ao spring quando ele deve controlar a transação. -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+</beans>
